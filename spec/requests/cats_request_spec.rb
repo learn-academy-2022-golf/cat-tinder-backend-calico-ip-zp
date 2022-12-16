@@ -87,7 +87,7 @@ RSpec.describe "Cats", type: :request do
         cat:{
           name: 'Stephen',
           age: 13,
-          enjoys: 'digging in the trees for bird nests',
+          enjoys: 'digging in the trees for bird nests'
         }
       }
       
@@ -224,6 +224,31 @@ RSpec.describe "Cats", type: :request do
 
       expect(json['image']).to include "can't be blank"
     end
+
+    it "it doesn't update, a cat if the enjoys, is less than 10 characters" do
+      Cat.create(
+        name: 'Stephen',
+        age: 13,
+        enjoys: 'digging in the trees for bird nests',
+        image: 'https://static.onecms.io/wp-content/uploads/sites/47/2020/11/30/cat-stuck-in-tree-298823311-2000.jpg'
+      )
+              cat_params = {
+          cat:{
+            name: 'Stephen',
+            age: 15,
+            enjoys: 'digging',
+            image:  'https://static.onecms.io/wp-content/uploads/sites/47/2020/11/30/cat-stuck-in-tree-298823311-2000.jpg'
+        }
+      }
+      cat = Cat.last
+
+      patch "/cats/#{cat.id}", params: cat_params
+      expect(response.status).to eq(422)
+      json = JSON.parse(response.body)
+
+      expect(json['enjoys']).to include 'is too short (minimum is 10 characters)'
+    end
+
 
   end
   describe "DELETE /destroy" do
